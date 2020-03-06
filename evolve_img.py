@@ -1,5 +1,5 @@
-import numpy as np
 
+import numpy as np
 import os
 import skimage
 from scipy.stats import skewnorm
@@ -11,6 +11,8 @@ from constants import mutation_size
 from constants import Population_Size
 from constants import crossover_selection
 from constants import mutation_selection
+from constants import summ
+
 
 
 class ThreadWithReturnValue(Thread):
@@ -84,23 +86,23 @@ def Evolve():
     best_entity = Population[0]
     new_poppulation = None
     show_img(best_entity.img)
-    choices = [Population[i].val  for i in range(Population_Size)]
+    choices = [summ - Population[i].val  for i in range(Population_Size)]
     while best_entity.val != 0 and evolv_index < evolv_limit:
-        x = random.choices(Population, weights=choices, k=Population_Size)
-        y = random.choices(Population, weights=choices, k=Population_Size)
+        x = Population[0]
+        y = Population[1]
         new_poppulation = []
 
         for i in range(Population_Size):
             child = Entity()
             threadss = []
             for j in range(messi.shape[2]):
-                threeadd = ThreadWithReturnValue(target=crossover, args=(x[i].img[:, :, j], y[i].img[:, :, j]))
+                threeadd = ThreadWithReturnValue(target=crossover, args=(x.img[:, :, j], y.img[:, :, j]))
                 threadss.append(threeadd)
             for j in range(messi.shape[2]):
                 threadss[j].start()
             for j in range(messi.shape[2]):
                 child.img[:, :, j] = threadss[j].join()
-            if random.randint(1, 50) == 10:
+            if random.randint(1, 10) == 10:
                 mutation(child)
             child.update_val()
             if child.val > best_entity.val:
@@ -110,7 +112,7 @@ def Evolve():
         evolv_index += 1
         print(evolv_index)
         Population = sorted(new_poppulation, key= lambda e:e.val)
-        choices = [Population[k].val  for k in range(Population_Size)]
+        choices = [summ - Population[k].val  for k in range(Population_Size)]
 
 
 # threads = []
@@ -126,3 +128,4 @@ def Evolve():
 # mutation(messi_Entity)
 
 Evolve()
+
