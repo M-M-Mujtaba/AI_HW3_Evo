@@ -43,10 +43,11 @@ class Entity:
 
     def __init__(self):
         self.img = np.random.random_integers(0, 255, messi.shape)
-        self.val = np.sum(np.abs(np.subtract(self.img, messi)))
+        self.val =  np.sum(np.sum(np.abs(np.subtract(self.img, messi)), axis=0), axis= 0)
 
     def update_val(self):
-        self.val = np.sum(np.abs(np.subtract(self.img, messi)))
+        self.val =np.sum(np.sum(np.abs(np.subtract(self.img, messi)), axis=0), axis= 0)
+
 
     @staticmethod
     def generate_pop(size):
@@ -74,15 +75,14 @@ def mutation(entity):
     positions = np.random.randint(0, 249 - mutation_size, (2, 4))
     # print(messi.shape[2])
     for i in range(messi.shape[2]):
-        entity.img[positions[0][i]: positions[0][i] + mutation_size, positions[1][i]:positions[1][i] + mutation_size,
-        i] = np.random.randint(0, 255, (mutation_size, mutation_size))
+        entity.img[positions[0][i]: positions[0][i] + mutation_size, positions[1][i]:positions[1][i] + mutation_size,i] = np.random.randint(0, 255, (mutation_size, mutation_size))
 
 
 def Evolve():
     evolv_limit = 100
     evolv_index = 0
     Population = Entity.generate_pop(Population_Size)
-    Population = sorted(Population, key=lambda e: e.val)
+    Population = sorted(Population, key=lambda e: e.val, reverse= True )
     best_entity = Population[0]
     new_poppulation = None
     show_img(best_entity.img)
@@ -91,7 +91,6 @@ def Evolve():
         x = Population[0]
         y = Population[1]
         new_poppulation = []
-
         for i in range(Population_Size):
             child = Entity()
             threadss = []
@@ -102,7 +101,7 @@ def Evolve():
                 threadss[j].start()
             for j in range(messi.shape[2]):
                 child.img[:, :, j] = threadss[j].join()
-            if random.randint(1, 10) == 10:
+            if random.randint(1, 50) == 10:
                 mutation(child)
             child.update_val()
             if child.val > best_entity.val:
@@ -111,7 +110,7 @@ def Evolve():
             new_poppulation.append(child)
         evolv_index += 1
         print(evolv_index)
-        Population = sorted(new_poppulation, key= lambda e:e.val)
+        Population = sorted(Population, key=lambda e: e.val, reverse= True )
         choices = [summ - Population[k].val  for k in range(Population_Size)]
 
 
@@ -126,6 +125,6 @@ def Evolve():
 #     messi[:, :, i] = threads[i].join()
 # messi_Entity = Entity()
 # mutation(messi_Entity)
-
-Evolve()
+print(np.sum(np.sum(messi, axis=0), axis= 0))
+show_img(messi)
 
