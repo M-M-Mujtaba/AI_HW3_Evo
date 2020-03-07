@@ -124,14 +124,18 @@ def Evolve(plane):
     return best_entity.img
     # threads = []
 
-
+def musiconloop(music):
+    for i in range(10):
+        T = Thread(target=playsound, args=('boomboom.mp3',) )
+        T.start()
+        T.join()
 
 def main():
     messi = io.imread('low_res.jpg')
     print(messi.shape)
     final_img = np.zeros(messi.shape, dtype=int)
     Threads = []
-    Music = Thread(target=playsound, args=('boomboom.mp3',) )
+    Music = Thread(target=musiconloop, args=('boomboom.mp3',) )
     Music.start()
     # create thread for each layer and evolve them simultaneously
     for i in range(messi.shape[2]):
@@ -142,9 +146,6 @@ def main():
         Threads[i].start()
     for i in range(messi.shape[2]):
         final_img[:, :, i] = Threads[i].join()
-    Music.join()
-    Music.start()
-    Music.join()
     # for i in range(messi.shape[2]):
     #     final_img[:,:,i] = messi[:,:,i]
     show_img(final_img)
