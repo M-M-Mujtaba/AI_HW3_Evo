@@ -3,10 +3,12 @@ import matplotlib.pyplot as plt
 import random
 from threading import Thread
 from skimage import io
-from constants import mutation_size
 from constants import Population_Size
 from constants import crossover_selection
+from constants import mutation_selection
+from constants import mutation_size
 from playsound import playsound
+from constants import generation_limit
 
 
 
@@ -60,7 +62,8 @@ class Entity:
 
 # Return a new child created by combining two planes with random breaking point
 def crossover(plane1, plane2):
-    x_point = random.randint(1, len(plane1) - 1)
+
+    x_point =  random.randint(1, len(plane1) - 1)
     y_point = random.randint(1, len(plane1) - 1)
     child = np.zeros((len(plane1),len(plane1)))  # initialize the child to 0s
     child[:x_point, :y_point] = plane1[:x_point, :y_point]  # copy plane 1 from initial to xpoint and ypoint in child
@@ -72,17 +75,19 @@ def crossover(plane1, plane2):
 
 # apply grid level mutaion(randomly change value)
 def mutation(entity):
-    positions = np.random.randint(0, len(entity.img) - mutation_size - 1, (2, 1))  # generating a starting point
+
+    positions = np.random.randint(0, len(entity.img)  -1, (2, mutation_size))  # generating a starting point
     # between 0 and max size - mutation size
     # the image is 2d numpy array
-    entity.img[positions[0][0]: positions[0][0] + mutation_size,
-    positions[1][0]:positions[1][0] + mutation_size] = np.random.randint(0, 255, (mutation_size, mutation_size))
+    for i in range(mutation_size):
+        entity.img[positions[0][i]: positions[0][i] + mutation_size,
+        positions[1][i]:positions[1][i] + mutation_size] = random.randint(0, 255)
 
 
 # the main evolutionary function that apply crossover and mutation to randomly generated images in order to converge to
 # the target image
 def Evolve(plane):
-    evolv_limit = 1000  # maximum number of generations
+    evolv_limit = generation_limit # maximum number of generations
     evolv_index = 0  # index for generations
     Population = Entity.generate_pop(Population_Size, plane)
     Population = sorted(Population, key=lambda e: e.val, reverse=True)  # sort the populations based on the fitness
@@ -96,12 +101,14 @@ def Evolve(plane):
 
     # run until we converge to the target or we reach our generational limit
     while best_entity.val != 1 and evolv_index < evolv_limit:
-        x = random.choices(Population, weights=choices, k=int(Population_Size * crossover_selection))  # get the top
+        x = random.choices(Population, weights=choices, k=int(Population_Size* crossover_selection))  # get the top
         # crossover_(selection * 100) % of populations based on their proportional probability
-        y = random.choices(Population, weights=choices, k=int(Population_Size * crossover_selection))
+        y = random.choices(Population, weights=choices, k=int(Population_Size* crossover_selection))
         new_population = []
-        mutation_selection = (((evolv_limit + 1 - evolv_index) / evolv_limit) * 0.5 + 0.05)
-        for i in range(Population_Size):
+        new_population.append(Population[0])
+        new_population.append(Population[1])
+        #mutation_selection = (((evolv_limit + 1 - evolv_index) / evolv_limit) * 0.5 + 0.05)
+        for i in range(Population_Size-2):
             parent1 = x[i % int(Population_Size * crossover_selection)]
             parent2 = y[i % int(Population_Size * crossover_selection)]
             child = Entity(plane)
@@ -125,18 +132,18 @@ def Evolve(plane):
     # threads = []
 
 def musiconloop(music):
-    for i in range(10):
+    for i in range(20):
         T = Thread(target=playsound, args=('boomboom.mp3',) )
         T.start()
         T.join()
 
 def main():
-    messi = io.imread('low_res.jpg')
+    messi = io.imread('face.png')
     print(messi.shape)
     final_img = np.zeros(messi.shape, dtype=int)
     Threads = []
-    Music = Thread(target=musiconloop, args=('boomboom.mp3',) )
-    Music.start()
+    #Music = Thread(target=musiconloop, args=('boomboom.mp3',) )
+    #Music.start()
     # create thread for each layer and evolve them simultaneously
     for i in range(messi.shape[2]):
         arg_to_send = Frame(messi[:, :, i])
@@ -148,6 +155,7 @@ def main():
         final_img[:, :, i] = Threads[i].join()
     # for i in range(messi.shape[2]):
     #     final_img[:,:,i] = messi[:,:,i]
+    final_img = np.reshape(final_img, (messi.shape))
     show_img(final_img)
 
 if __name__ == "__main__":
