@@ -6,6 +6,8 @@ from skimage import io
 from constants import mutation_size
 from constants import Population_Size
 from constants import crossover_selection
+from playsound import playsound
+
 
 
 class ThreadWithReturnValue(Thread):
@@ -98,13 +100,13 @@ def Evolve(plane):
         # crossover_(selection * 100) % of populations based on their proportional probability
         y = random.choices(Population, weights=choices, k=int(Population_Size * crossover_selection))
         new_population = []
-        mutation_selection = ((evolv_limit + 1 - evolv_index) / evolv_limit) * 0.5
+        mutation_selection = (((evolv_limit + 1 - evolv_index) / evolv_limit) * 0.5 + 0.05)
         for i in range(Population_Size):
             parent1 = x[i % int(Population_Size * crossover_selection)]
             parent2 = y[i % int(Population_Size * crossover_selection)]
             child = Entity(plane)
             child.img = crossover(parent1.img, parent2.img)
-            if random.randint(1, int(1 / mutation_selection)) == 1:
+            if random.randint(0, int(1 / mutation_selection)) == 1:
                 mutation(child)
                 # print("mutated")
             child.update_val()
@@ -125,10 +127,12 @@ def Evolve(plane):
 
 
 def main():
-    messi = io.imread('face.png')
+    messi = io.imread('low_res.jpg')
+    print(messi.shape)
     final_img = np.zeros(messi.shape, dtype=int)
     Threads = []
-
+    Music = Thread(target=playsound, args=('boomboom.mp3',) )
+    Music.start()
     # create thread for each layer and evolve them simultaneously
     for i in range(messi.shape[2]):
         arg_to_send = Frame(messi[:, :, i])
@@ -138,6 +142,9 @@ def main():
         Threads[i].start()
     for i in range(messi.shape[2]):
         final_img[:, :, i] = Threads[i].join()
+    Music.join()
+    Music.start()
+    Music.join()
     # for i in range(messi.shape[2]):
     #     final_img[:,:,i] = messi[:,:,i]
     show_img(final_img)
