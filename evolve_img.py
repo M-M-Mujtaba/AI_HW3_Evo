@@ -87,7 +87,7 @@ def mutation(entity):
 
 def vec_mutation(vec):
 
-    positions = np.random.randint(0, vec.size - 1, (int(vec.size * mutation_size) , 1))  # generating a starting point
+    #positions = np.random.randint(0, vec.size - 1, (int(vec.size * mutation_size) , 1))  # generating a starting point
     # # between 0 and max size - mutation size
     # # the image is 2d numpy array
     # mutate = int(vec.size * mutation_size)
@@ -96,8 +96,11 @@ def vec_mutation(vec):
     # np.random.shuffle(arr)
     # arr = np.multiply(arr, positions) % 250
     # vec = np.add(vec, arr)
-    for i in positions:
-        vec[i] = random.randint(0, 250)
+    #for i in positions:
+        #vec[i] = random.randint(0, 250)
+    mask = np.random.randint(0,2, size=vec.shape).astype(np.bool)
+    r = np.mod(np.random.rand(*vec.shape)*1000, 255)
+    vec[mask] = r[mask]
     return  vec
     # for i in range(mutation_size):
     #     entity.img[positions[0][i]: positions[0][i] + mutation_size,
@@ -129,7 +132,7 @@ def Evolve(plane, tid):
         new_population = []
         new_population.append(Population[0])
         new_population.append(Population[1])
-        mutation_selection = (((evolv_limit + 1 - evolv_index) / evolv_limit) * 0.5 + 0.1)
+        mutation_selection = 0.1
         for i in range(Population_Size-2):
             parent1 = x[i % int(Population_Size * crossover_selection)]
             parent2 = y[i % int(Population_Size * crossover_selection)]
@@ -161,36 +164,44 @@ def musiconloop(music):
 
 def main():
     messi = io.imread('face.png')
+    #dusri = io.imread('imageB.bmp')
     image = messi  #color.rgb2gray(messi)
-
-    image_rescaled = resize(image, (image.shape[0] // 5, image.shape[1] // 5),
+    show_img(image)
+    #print(dusri.shape)
+    image_rescaled = resize(image, (35, 35),
                        anti_aliasing=True)
+    #image_rescaled_2 = resize(dusri, (50, 50), anti_aliasing=True)
     og_shape = image_rescaled.shape
-    print(og_shape)
-
-    messi = np.reshape(image_rescaled, (image_rescaled.size, 1))
-    for i in range(10000):
-        result = vec_crossover(messi, messi)
-    result = np.reshape(result, (og_shape))
+    show_img(image_rescaled)
+    #print(image_rescaled_2.shape)
+    #dusri = np.reshape(image_rescaled_2, (image_rescaled_2.size, 1))
+    #messi = np.reshape(image_rescaled, (image_rescaled.size, 1))
+    # for i in range(1000):
+    # #     result = vec_mutation(messi)
+    # result = np.zeros(messi.shape)
+    # for i in range(messi.shape[2]):
+    #     result[:, :, i] = Evolve(Frame(messi[:, :, i]), 1)
+    # for i in range(1000):
+    #result = vec_crossover(messi, dusri)
     # # print(messi.shape)
-    # # final_img = np.zeros(messi.shape, dtype=int)
-    # # Threads = []
-    # # Music = Thread(target=musiconloop, args=('boomboom.mp3',) )
-    # # Music.start()
-    # # # create thread for each layer and evolve them simultaneously
-    # # for i in range(messi.shape[2]):
-    # #     arg_to_send = Frame(messi[:, :, i])
-    # #     Threadd = ThreadWithReturnValue(target=Evolve, args=(arg_to_send, i))
-    # #     Threads.append(Threadd)
-    # # for i in range(messi.shape[2]):
-    # #     Threads[i].start()
-    # # for i in range(messi.shape[2]):
-    # #     final_img[:, :, i] = Threads[i].join()
-    # # # for i in range(messi.shape[2]):
-    # # #     final_img[:,:,i] = messi[:,:,i]
-    # # final_img = np.reshape(final_img, (messi.shape))
+    final_img = np.zeros(messi.shape, dtype=int)
+    Threads = []
+    Music = Thread(target=musiconloop, args=('boomboom.mp3',) )
+    Music.start()
+    # create thread for each layer and evolve them simultaneously
+    for i in range(messi.shape[2]):
+        arg_to_send = Frame(messi[:, :, i])
+        Threadd = ThreadWithReturnValue(target=Evolve, args=(arg_to_send, i))
+        Threads.append(Threadd)
+    for i in range(messi.shape[2]):
+        Threads[i].start()
+    for i in range(messi.shape[2]):
+        final_img[:, :, i] = Threads[i].join()
+    # for i in range(messi.shape[2]):
+    #     final_img[:,:,i] = messi[:,:,i]
+    final_img = np.reshape(final_img, (messi.shape))
     # #print(messi[:,:,1].shape)
-    show_img(result)
+    show_img(final_img)
 
 if __name__ == "__main__":
     main()
