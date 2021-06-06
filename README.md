@@ -1,4 +1,5 @@
 
+
 # Evolutional Image Creation
 
 One of my most fun project for AI, it involved generating images using Evolutionary Computing
@@ -8,7 +9,7 @@ One of my most fun project for AI, it involved generating images using Evolution
 I learned about mutation and reproduction in the context of genatic algorithims and how are they able to find the right solution in a vast search space.
 ## Screenshots
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+![Capture](https://user-images.githubusercontent.com/48154614/120935843-89517b00-c6b9-11eb-80ae-d8b5e0c8a0af.PNG)
 
   
 ## Authors
